@@ -1,7 +1,7 @@
-## Merkle Tree API
-This is Go implementation of User access microservice,
+## Users Access service
+This is Go implementation of User access microservice.
 
-We Postgres for storage and Kafka for Asynchronous notification
+We use Postgres for storage and Kafka for Asynchronous notification of user changes
 
 ## GRPC API
 This service provide a GRPC API at port :50051
