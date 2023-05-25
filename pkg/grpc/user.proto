@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package grpc;
+
+service UserService {
+  rpc AddUser(UserRequest) returns (UserResponse) {}
+  rpc UpdateUser(UserRequest) returns (UserResponse) {}
+  rpc RemoveUser(UserRequest) returns (UserResponse) {}
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {}
+}
+
+message UserRequest {
+  string id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string nickname = 4;
+  string password = 5;
+  string email = 6;
+  string country = 7;
+}
+
+message UserResponse {
+  string id = 1;
+  string message = 2;
+}
+
+message GetUsersRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string country = 3;
+}
+
+message GetUsersResponse {
+  repeated UserRequest users = 1;
+}
