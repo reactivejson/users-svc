@@ -2,9 +2,15 @@ package grpc
 
 import (
 	"context"
-	"github.com/reactivejson/usr-svc/internal/app"
-	"github.com/reactivejson/usr-svc/internal/domain"
+	"errors"
+	"github.com/reactivejson/users-svc/internal/app"
+	"github.com/reactivejson/users-svc/internal/domain"
 )
+
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2023
+ */
 
 // UserServiceServerImpl implements the gRPC UserServiceServer interface.
 type UserServiceServerImpl struct {
@@ -35,6 +41,9 @@ func (s *UserServiceServerImpl) AddUser(ctx context.Context, req *UserRequest) (
 
 // GetUsers implements the GetUsers gRPC method.
 func (s *UserServiceServerImpl) GetUsers(ctx context.Context, req *GetUsersRequest) (*GetUsersResponse, error) {
+	if req.PageSize < 0 {
+		return nil, errors.New("Error in user retrieval (invalid page size)")
+	}
 	users, err := s.UserService.GetUsers(req.Country, int(req.Page), int(req.PageSize))
 	if err != nil {
 		return nil, err

@@ -2,67 +2,34 @@
 package main
 
 import (
-	"github.com/reactivejson/usr-svc/internal/domain"
-	"github.com/reactivejson/usr-svc/internal/repository"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"context"
+	"fmt"
+	"github.com/reactivejson/users-svc/internal/domain"
 	"log"
-	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"google.golang.org/grpc"
-
-	"github.com/reactivejson/usr-svc/internal/app"
-	grpcc "github.com/reactivejson/usr-svc/pkg/grpc"
+	conf "github.com/reactivejson/users-svc/cmd/app"
 )
 
-const (
-	grpcPort     = ":50051"
-	kafkaBrokers = "localhost:9092" // Modify with your Kafka brokers
-	kafkaTopic   = "user_events"    // Modify with your Kafka topic
-)
-
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2023
+ */
 func main() {
-	// Create a new instance of UserService
-	// Initialize repository
-	// Initialize the database connection
-	dsn := "host=localhost user=your_user password=your_password dbname=your_database port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
-	}
+	ctx, cancelCtxFn := context.WithCancel(context.Background())
 
-	err = db.AutoMigrate(&domain.User{})
-	if err != nil {
-		log.Fatalf("failed to auto-migrate user table: %v", err)
-	}
+	cfg := conf.SetupEnvConfig()
 
-	userRepository := repository.NewUserRepository(db)
+	fmt.Printf("KafkaBrokers %s\n", cfg.KafkaBrokers)
+	fmt.Printf("GrpcPort %s\n", cfg.GrpcPort)
 
-	//userRepo := repository.NewInMemoryUserStorage()
-	userNotifier := &mockNotifier{}
+	// Intercepting shutdown signals.
+	go waitForSignal(ctx, cancelCtxFn)
 
-	//userNotifier := &app.MockUserNotifier{} // Replace with actual implementation
-	userService := app.NewUserService(userRepository, userNotifier)
-
-	// Create a new gRPC server
-	server := grpc.NewServer()
-
-	// Register the UserServiceServer with the server
-	grpcc.RegisterUserServiceServer(server, &grpcc.UserServiceServerImpl{
-		UserService: userService,
-	})
-
-	// Start listening on a TCP port
-	listener, err := net.Listen("tcp", grpcPort)
-	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
-	}
-
-	// Serve the gRPC server
-	log.Println("gRPC server is running...")
-	if err := server.Serve(listener); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
-	}
+	appCtx := conf.NewContext(cfg)
+	logExitMsg(conf.Setup(ctx, appCtx))
 }
 
 type mockNotifier struct {
@@ -71,4 +38,24 @@ type mockNotifier struct {
 
 func (m *mockNotifier) NotifyUserChange(user *domain.User) error {
 	return m.notifyError
+}
+
+func waitForSignal(ctx context.Context, cancel context.CancelFunc) {
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case s := <-signals:
+		log.Printf("received signal: %s, exiting gracefully", s)
+		cancel()
+	case <-ctx.Done():
+		log.Printf("Service context done, serving remaining requests and exiting.")
+	}
+}
+
+func logExitMsg(err error) {
+	if err != nil {
+		log.Fatalf("Service failed to setup: %s", err)
+	}
+
+	log.Print("Service exited successfully")
 }

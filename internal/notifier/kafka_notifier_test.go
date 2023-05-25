@@ -1,4 +1,6 @@
-// internal/notifier/kafka_notifier_test.go
+//go:build integrations
+// +build integrations
+
 package notifier
 
 import (
@@ -9,8 +11,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/reactivejson/usr-svc/internal/domain"
+	"github.com/reactivejson/users-svc/internal/domain"
 )
+
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2023
+ */
 
 type MockAsyncProducer struct {
 	mock.Mock
@@ -99,7 +106,7 @@ func TestNotifyUserChange(t *testing.T) {
 	}
 
 	// Trigger the notification
-	err := notifier.NotifyUserChange(user)
+	err := notifier.NotifyUserChange(Created, user)
 
 	// Assert that no error occurred
 	assert.NoError(t, err)

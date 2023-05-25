@@ -1,14 +1,19 @@
-// internal/app/user_service_test.go
 package app
 
 import (
 	"errors"
+	"github.com/reactivejson/users-svc/internal/notifier"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/reactivejson/usr-svc/internal/domain"
+	"github.com/reactivejson/users-svc/internal/domain"
 )
+
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2023
+ */
 
 type mockStorage struct {
 	users       map[string]*domain.User
@@ -47,7 +52,7 @@ type mockNotifier struct {
 	notifyError error
 }
 
-func (m *mockNotifier) NotifyUserChange(user *domain.User) error {
+func (m *mockNotifier) NotifyUserChange(notifier.UserEventType, *domain.User) error {
 	return m.notifyError
 }
 

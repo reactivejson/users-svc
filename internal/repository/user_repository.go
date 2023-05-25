@@ -1,10 +1,15 @@
-// internal/repository/user_repository.go
 package repository
 
 import (
-	model "github.com/reactivejson/usr-svc/internal/domain"
+	"github.com/google/uuid"
+	model "github.com/reactivejson/users-svc/internal/domain"
 	"gorm.io/gorm"
 )
+
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2023
+ */
 
 type UserRepository interface {
 	Save(user *model.User) error
@@ -29,7 +34,8 @@ func (r *userRepository) Update(user *model.User) error {
 }
 
 func (r *userRepository) Delete(userID string) error {
-	return r.db.Delete(&model.User{}, userID).Error
+	id, _ := uuid.Parse(userID)
+	return r.db.Delete(&model.User{}, id).Error
 }
 
 func (r *userRepository) FindByCountry(country string, page, pageSize int) ([]*model.User, error) {

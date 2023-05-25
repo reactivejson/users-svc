@@ -1,11 +1,15 @@
-// internal/notifier/user_notifier.go
 package notifier
 
 import (
-	"github.com/reactivejson/usr-svc/internal/domain"
+	"github.com/reactivejson/users-svc/internal/domain"
 )
+
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2023
+ */
 
 // UserNotifier represents the user notifier.
 type UserNotifier interface {
-	NotifyUserChange(user *domain.User) error
+	NotifyUserChange(eventType UserEventType, user *domain.User) error
 }

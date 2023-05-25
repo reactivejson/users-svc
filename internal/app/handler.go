@@ -1,13 +1,22 @@
-// internal/app/handler.go
 package app
 
 import (
-	"github.com/reactivejson/usr-svc/internal/domain"
-	"github.com/reactivejson/usr-svc/internal/utils"
+	"github.com/reactivejson/users-svc/internal/domain"
+	"github.com/reactivejson/users-svc/internal/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2023
+ */
+
+// HealthHandler handles the health check endpoint
+func HealthHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
 
 // AddUserHandler handles the request to add a new user.
 func (s *UserService) AddUserHandler(c *gin.Context) {

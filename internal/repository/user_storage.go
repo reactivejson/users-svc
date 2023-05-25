@@ -1,10 +1,9 @@
-// internal/repository/user_storage.go
 package repository
 
 import (
 	"github.com/pkg/errors"
 
-	"github.com/reactivejson/usr-svc/internal/domain"
+	"github.com/reactivejson/users-svc/internal/domain"
 )
 
 // InMemoryUserStorage is an in-memory implementation of UserStorage.

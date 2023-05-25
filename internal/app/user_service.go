@@ -1,12 +1,20 @@
-// internal/app/user_service.go
 package app
 
 import (
+	"encoding/hex"
 	"github.com/pkg/errors"
-	"github.com/reactivejson/usr-svc/internal/domain"
-	"github.com/reactivejson/usr-svc/internal/notifier"
-	"github.com/reactivejson/usr-svc/internal/repository"
+	"github.com/reactivejson/users-svc/internal/domain"
+	"github.com/reactivejson/users-svc/internal/notifier"
+	"github.com/reactivejson/users-svc/internal/repository"
+	"lukechampine.com/blake3"
+
+	"log"
 )
+
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2023
+ */
 
 // UserService represents the user service.
 type UserService struct {
@@ -25,14 +33,16 @@ func NewUserService(repository repository.UserRepository, notifier notifier.User
 
 // AddUser adds a new user.
 func (s *UserService) AddUser(user *domain.User) error {
+	user.Password = hashPswd(user.Password)
 	err := s.Storage.Save(user)
 	if err != nil {
 		return errors.Wrap(err, "failed to save user")
 	}
 
-	err = s.Notifier.NotifyUserChange(user)
+	err = s.Notifier.NotifyUserChange(notifier.Created, user)
 	if err != nil {
-		// Handle error while notifying
+		log.Printf("Failed to send notification.")
+
 	}
 
 	return nil
@@ -40,14 +50,15 @@ func (s *UserService) AddUser(user *domain.User) error {
 
 // UpdateUser updates an existing user.
 func (s *UserService) UpdateUser(user *domain.User) error {
+	user.Password = hashPswd(user.Password)
 	err := s.Storage.Update(user)
 	if err != nil {
 		return errors.Wrap(err, "failed to update user")
 	}
 
-	err = s.Notifier.NotifyUserChange(user)
+	err = s.Notifier.NotifyUserChange(notifier.Updated, user)
 	if err != nil {
-		// Handle error while notifying
+		log.Printf("Failed to send notification.")
 	}
 
 	return nil
@@ -60,8 +71,10 @@ func (s *UserService) DeleteUser(userID string) error {
 		return errors.Wrap(err, "failed to delete user")
 	}
 
-	// Notifying is not necessary for deletion
-
+	err = s.Notifier.NotifyUserChange(notifier.Deleted, &domain.User{ID: userID})
+	if err != nil {
+		log.Printf("Failed to send notification.")
+	}
 	return nil
 }
 
@@ -73,4 +86,9 @@ func (s *UserService) GetUsers(country string, page, pageSize int) ([]*domain.Us
 	}
 
 	return users, nil
+}
+
+func hashPswd(password string) string {
+	hash := blake3.Sum256([]byte(password))
+	return hex.EncodeToString(hash[:])
 }

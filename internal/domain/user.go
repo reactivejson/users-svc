@@ -1,7 +1,13 @@
-// internal/domain/user.go
 package domain
 
-import "time"
+import (
+	"time"
+)
+
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2023
+ */
 
 // User represents a user entity.
 type User struct {

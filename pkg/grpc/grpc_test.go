@@ -2,15 +2,20 @@ package grpc_test
 
 import (
 	"context"
-	"github.com/reactivejson/usr-svc/internal/domain"
+	"github.com/reactivejson/users-svc/internal/domain"
+	"github.com/reactivejson/users-svc/internal/notifier"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/reactivejson/usr-svc/internal/app"
-	"github.com/reactivejson/usr-svc/pkg/grpc"
+	"github.com/reactivejson/users-svc/internal/app"
+	"github.com/reactivejson/users-svc/pkg/grpc"
 )
 
+/**
+ * @author Mohamed-Aly Bou-Hanane
+ * © 2023
+ */
 type mockStorage struct {
 	users       map[string]*domain.User
 	saveError   error
@@ -57,7 +62,7 @@ type mockNotifier struct {
 	notifyError error
 }
 
-func (m *mockNotifier) NotifyUserChange(user *domain.User) error {
+func (m *mockNotifier) NotifyUserChange(event notifier.UserEventType, user *domain.User) error {
 	return m.notifyError
 }
 
